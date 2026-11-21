@@ -4,7 +4,9 @@
 # ///
 """在 Vault 的 `recall/reviews.jsonl` 追加一筆事件。
 
-用法：uv run log.py review <card-id> --grade again|hard|good|easy --hints N [--at ISO8601] [--vault 路徑]
+用法：uv run log.py [--vault 路徑] review <card-id> --grade again|hard|good|easy --hints N [--at ISO8601]
+
+`--vault` 是所有子指令共用的選項，要寫在子指令前面。
 """
 
 import argparse

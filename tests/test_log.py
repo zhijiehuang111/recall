@@ -120,3 +120,22 @@ def test_log_review_refuses_at_without_timezone(ready_vault):
 
     assert result.code != 0
     assert ready_vault.log_lines() == []
+
+
+def test_log_writes_to_the_vault_given_before_the_subcommand(ready_vault, tmp_path):
+    ready_vault.add_card("sql-having")
+
+    result = ready_vault.log(
+        "--vault",
+        str(ready_vault.root),
+        "review",
+        "sql-having",
+        "--grade",
+        "good",
+        "--hints",
+        "0",
+        cwd=tmp_path,
+    )
+
+    assert result.code == 0, result.stderr
+    assert len(ready_vault.log_lines()) == 1
