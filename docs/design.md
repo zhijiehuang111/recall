@@ -13,13 +13,14 @@
 
 - 本 repo 是 Claude Code plugin（skills + 腳本），與學習紀錄分離。
 - 使用者在自己的 Vault（git 版控的筆記 repo）中執行 Claude Code；Vault 內有 `recall/` 即代表啟用。
-- 腳本一律 `uv run` 執行，v1 不加第三方套件。
+- 腳本一律 `uv run` 執行，只用標準函式庫，腳本開頭宣告 `requires-python >= 3.11`；使用者只需安裝 uv。
+- Repo 分兩層：plugin 本體放子目錄（唯一被安裝的部分），測試（pytest）與文件留在根目錄；根目錄的 marketplace 清單指向該子目錄。
 
 ```
 recall/
   config.toml              ← 每日時間預算、Target Role、roadmap 來源
-  topics/<topic>.md        ← 目的地、先不學什麼、Milestone、Application、狀態
-  cards/<card-id>.md       ← 題目、type、topic、出處
+  topics/<topic>.md        ← 目的地、先不學什麼、Application、狀態
+  cards/<card-id>.md       ← 題目、type、topic、capstone、出處
   .rubrics/<card-id>.md    ← Rubric（點開頭資料夾，避免作答前看到）
   workspace/<card-id>/     ← Build Card 的練習目錄，每次複習從空目錄重做
   reviews.jsonl            ← 作答／reset 事件，只追加
@@ -43,6 +44,8 @@ recall/
 
 - 同一 Session 內 Lapse 的卡最後再考一次；下一 Session 先考 Lapse / Hard 的卡。
 - 作答暴露出的 Gap，經同意後建新卡。
+- 非 Good / Easy 的作答附一句 `note`，只描述缺口、不寫正確答案；下次考同一張卡時 agent 據此追問（追問計入 Hint），同一缺口反覆出現時提議獨立成卡。
+- Capstone Card 在同 Topic 其他卡都至少有一次非 Again 作答後，才由 `due` 以新卡列出（程式強制，非提示詞規則）。
 - Lapse 累積 3 次 → Leech：停下來討論拆小、改寫或補前置卡。
 - 卡片大改（Rubric 要點或範圍變了）→ 詢問是否寫入 `reset` 事件；小改不影響排程。
 - 每日份量依時間預算：到期複習優先，剩餘預算才加新卡。
@@ -51,8 +54,8 @@ recall/
 
 - Recall / Explain Card：一個概念，2–5 分鐘。
 - Build Card：30 分鐘內。
-- Topic：一到兩週內可達第一個 Milestone，同時最多 2 個 active。
-- Application：30 分鐘內、48 小時內完成，可跳過，不進排程。
+- Topic：一到兩週內可完成（範圍變大就拆成下一個 Topic），同時最多 2 個 active。
+- Application：Topic 完成後由 agent 提出 2–3 個候選、使用者選定；30 分鐘內、48 小時內完成，可跳過，不進排程。
 
 ## 卡片類型
 
@@ -63,7 +66,7 @@ recall/
 ## 流程（skills）
 
 - **`recall`**：每日 Session。先追問上次 Application，再考到期卡，最後加新卡。Hint、Teaching、評分、Gap 都在此處理。
-- **`recall-topic`**：開新 Topic。訪談（一次一題）→ 程度測驗（3–5 題，答好的直接成卡並記 Good）→ 計畫（目的地、順序、先不學什麼、Milestone）→ 只建第一個 Milestone 需要的卡。agent 自行出題時，以 roadmap（預設 roadmap.sh Backend / Full Stack / AI Engineer，可加 JD 或題庫）當地圖：依 Target Role 挑節點快速測驗找弱點，再把弱點改寫成「真的想知道答案的問題」。
+- **`recall-topic`**：開新 Topic。訪談（一次一題）→ Placement Quiz（3–5 題，答好的直接成卡並從較長間隔起算）→ 計畫（目的地、順序、先不學什麼）→ 建立 Capstone Card 與它需要的前置卡。agent 自行出題時，以 roadmap（預設 roadmap.sh Backend / Full Stack / AI Engineer，可加 JD 或題庫）當地圖：依 Target Role 挑節點快速測驗找弱點，再把弱點改寫成「真的想知道答案的問題」。
 - **`recall-card`**：從筆記或面試題提議卡片；面試題太大就拆。
 - 首次執行時若無 `recall/`，自動建立並產生預設 `config.toml`。
 - 腳本：`due.py`（依時間預算列今日卡）、`log.py`（寫入一筆事件）。
@@ -71,7 +74,7 @@ recall/
 
 ## Topic 狀態
 
-`active` / `paused` / `done`（最後一個 Milestone 通過即 done）。Card 的複習不受 Topic 狀態影響；非 active 時不再新增卡、不提議 Application。
+`active` / `paused` / `done`（Capstone Card 首次評為 Good / Easy 即 done，接著提議 Application 與下一個 Topic）。Card 的複習不受 Topic 狀態影響；非 active 時不再新增卡、不提議 Application。
 
 ## 延後／待考慮
 

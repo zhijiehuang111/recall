@@ -13,15 +13,15 @@ _Avoid_: workspace, 筆記庫, project
 ### 學習內容
 
 **Topic**:
-一個使用者真的想知道答案的問題（例如「為什麼高併發時庫存會被扣成負數？」），帶有目的地、先不學什麼與里程碑；約一到兩週可達第一個里程碑。
+一個使用者真的想知道答案的問題（例如「為什麼高併發時庫存會被扣成負數？」），帶有目的地與先不學什麼；約一到兩週可完成，Capstone Card 通過即結束。範圍變大時拆成下一個 Topic，而非分階段。
 _Avoid_: 主題, subject, 課程, 題目
 
-**Milestone**:
-Topic 內一個「交得出來的成果」作為的檢查點，本身就是一張 Card；做到即代表該 Topic 進入下一階段。
-_Avoid_: 進度, checkpoint, 章節
+**Capstone Card**:
+證明使用者已抵達 Topic 目的地的那張收尾 Card（通常是 Build 或 Explain），每個 Topic 恰有一張；同 Topic 其他卡都至少答對過一次才開考，首次評為 Good / Easy 即代表 Topic 完成。
+_Avoid_: Milestone, 里程碑, 期末考, final
 
 **Application**:
-達到 Milestone 後，把學到的東西用在真實情境（side project、短文、面試式回答）的一件小事，30 分鐘內、48 小時內完成，可跳過，不進排程。
+Topic 完成後，把學到的東西用在真實情境（side project、短文、面試式回答）的一件小事；由 agent 提出候選、使用者選定，30 分鐘內、48 小時內完成，可跳過，不進排程。
 _Avoid_: 作業, homework, project
 
 **Target Role**:
@@ -59,6 +59,10 @@ _Avoid_: 解題, 示範答案, walkthrough
 **Rubric**:
 一張卡的評分重點：3–5 個答案必須涵蓋的要點，附可查證的出處；使用者作答完成前不應看到。
 _Avoid_: 答案, answer key, 標準答案
+
+**Placement Quiz**:
+開新 Topic 時用來判斷起點的 3–5 題測驗；答得好的題目直接成為 Card，並從較長的間隔開始。
+_Avoid_: 程度測驗, pretest, diagnostic
 
 **Session**:
 一輪連續的複習，從到期最久與上次出錯的卡開始考起。
