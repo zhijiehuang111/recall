@@ -1,15 +1,23 @@
-# 只服務開發環境（測試）；plugin 本體在 plugins/recall/，不會用到這個檔。
+# 只服務開發環境（測試、lint、型別檢查）；plugin 本體在 plugins/recall/，不會用到這個檔。
 [project]
 name = "recall-dev"
 version = "0.0.0"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = []
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
 
 [tool.uv]
 package = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.pyright]
+include = ["plugins", "tests"]
+venvPath = "."
+venv = ".venv"

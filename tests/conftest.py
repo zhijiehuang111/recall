@@ -35,6 +35,7 @@ def run_script(name: str, *args: str, cwd: Path) -> Result:
         env=env,
         capture_output=True,
         text=True,
+        check=False,  # 測試要自己斷言 exit code
     )
     return Result(proc.returncode, proc.stdout, proc.stderr)
 
@@ -44,13 +45,22 @@ class Vault:
         self.root = root
         self.recall = root / "recall"
 
-    def init(self) -> "Vault":
+    def init(self) -> Vault:
         (self.recall / "cards").mkdir(parents=True, exist_ok=True)
         (self.recall / "config.toml").write_text("daily_minutes = 30\n")
         return self
 
-    def add_card(self, card_id: str, *, type: str = "recall", created: str = "2026-11-01", extra: str = "") -> None:
-        frontmatter = f"---\ntitle: {card_id}\ntype: {type}\ncreated: {created}\n{extra}---\n"
+    def add_card(
+        self,
+        card_id: str,
+        *,
+        type: str = "recall",
+        created: str = "2026-11-01",
+        extra: str = "",
+    ) -> None:
+        frontmatter = (
+            f"---\ntitle: {card_id}\ntype: {type}\ncreated: {created}\n{extra}---\n"
+        )
         (self.recall / "cards" / f"{card_id}.md").write_text(frontmatter + "\n題目\n")
 
     def write_card(self, card_id: str, text: str) -> None:

@@ -1,3 +1,16 @@
+## 常用指令
+
+```bash
+uv run ruff check . && uv run ruff format --check .   # lint + 格式；自動修正用 `uv run ruff check --fix . && uv run ruff format .`
+uvx pyright                                           # 型別檢查，跟 VS Code 的 Pylance 同引擎；範圍與 venv 設定在 pyproject.toml
+uv run pytest                                         # 指令列測試
+```
+
+## 改東西時的約定
+
+- **改 Python**：改完跑 ruff 和 pyright，兩個都要 0 error。這個 repo 沒有 CI，要自己跑。
+- **Python 版本一律 3.14**：根目錄 `pyproject.toml` 與 `plugins/` 腳本的 PEP 723 都宣告 `>=3.14`；使用者端由 `uv run` 自動取得符合的 Python。
+
 ## Agent skills
 
 ### Issue tracker

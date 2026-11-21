@@ -21,7 +21,9 @@ def test_due_lists_never_reviewed_cards_as_new(ready_vault):
     ]
 
 
-def test_due_reads_only_single_line_fields_and_skips_lines_it_does_not_understand(ready_vault):
+def test_due_reads_only_single_line_fields_and_skips_lines_it_does_not_understand(
+    ready_vault,
+):
     ready_vault.write_card(
         "tcp-handshake",
         "---\n"
@@ -42,7 +44,12 @@ def test_due_reads_only_single_line_fields_and_skips_lines_it_does_not_understan
 
     assert result.code == 0, result.stderr
     assert result.json()["cards"] == [
-        {"card": "tcp-handshake", "type": "explain", "kind": "new", "due": "2026-11-05"},
+        {
+            "card": "tcp-handshake",
+            "type": "explain",
+            "kind": "new",
+            "due": "2026-11-05",
+        },
     ]
 
 
@@ -61,7 +68,9 @@ def test_due_reports_which_log_line_is_broken(ready_vault):
 
 def test_due_ignores_event_types_it_does_not_know(ready_vault):
     ready_vault.add_card("sql-having")
-    ready_vault.log_path.write_text('{"event": "something-later", "card": "sql-having"}\n')
+    ready_vault.log_path.write_text(
+        '{"event": "something-later", "card": "sql-having"}\n'
+    )
 
     result = ready_vault.due("--today", "2026-11-05")
 

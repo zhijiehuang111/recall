@@ -13,7 +13,7 @@
 
 - 本 repo 是 Claude Code plugin（skills + 腳本），與學習紀錄分離。
 - 使用者在自己的 Vault（git 版控的筆記 repo）中執行 Claude Code；Vault 內有 `recall/` 即代表啟用。
-- 腳本一律 `uv run` 執行，只用標準函式庫，腳本開頭宣告 `requires-python >= 3.11`；使用者只需安裝 uv。
+- 腳本一律 `uv run` 執行，只用標準函式庫，腳本開頭宣告 `requires-python >= 3.14`；使用者只需安裝 uv。
 - Repo 分兩層：plugin 本體放子目錄（唯一被安裝的部分），測試（pytest）與文件留在根目錄；根目錄的 marketplace 清單指向該子目錄。
 
 ```

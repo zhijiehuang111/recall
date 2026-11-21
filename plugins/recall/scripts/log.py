@@ -1,13 +1,11 @@
 # /// script
-# requires-python = ">=3.11"
+# requires-python = ">=3.14"
 # dependencies = []
 # ///
 """在 Vault 的 `recall/reviews.jsonl` 追加一筆事件。
 
 用法：uv run log.py review <card-id> --grade again|hard|good|easy --hints N [--at ISO8601] [--vault 路徑]
 """
-
-from __future__ import annotations
 
 import argparse
 import json
@@ -45,15 +43,21 @@ def _hints(value: str) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--vault", type=Path, default=Path.cwd(), help="Vault 根目錄（預設為目前目錄）")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--vault", type=Path, default=Path.cwd(), help="Vault 根目錄（預設為目前目錄）"
+    )
     commands = parser.add_subparsers(dest="command", required=True)
 
     review = commands.add_parser("review", help="記錄一次作答")
     review.add_argument("card", help="Card ID（cards/ 下的檔名，不含 .md）")
     review.add_argument("--grade", required=True, choices=GRADES)
     review.add_argument("--hints", required=True, type=_hints, help="用了幾次 Hint")
-    review.add_argument("--at", type=_timestamp, help="作答時間，ISO 8601 含時區（預設為現在）")
+    review.add_argument(
+        "--at", type=_timestamp, help="作答時間，ISO 8601 含時區（預設為現在）"
+    )
     args = parser.parse_args()
 
     try:

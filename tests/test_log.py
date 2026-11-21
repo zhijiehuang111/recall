@@ -3,10 +3,19 @@ import json
 
 def test_log_review_appends_exactly_one_review_event(ready_vault):
     ready_vault.add_card("sql-having")
-    ready_vault.log_path.write_text('{"event": "review", "card": "sql-having", "at": "2026-11-01T09:00:00+08:00", "grade": "good", "hints": 0}\n')
+    ready_vault.log_path.write_text(
+        '{"event": "review", "card": "sql-having", "at": "2026-11-01T09:00:00+08:00", "grade": "good", "hints": 0}\n'
+    )
 
     result = ready_vault.log(
-        "review", "sql-having", "--grade", "hard", "--hints", "2", "--at", "2026-11-03T21:15:00+08:00"
+        "review",
+        "sql-having",
+        "--grade",
+        "hard",
+        "--hints",
+        "2",
+        "--at",
+        "2026-11-03T21:15:00+08:00",
     )
 
     assert result.code == 0, result.stderr
@@ -24,7 +33,9 @@ def test_log_review_appends_exactly_one_review_event(ready_vault):
 def test_log_review_refuses_unknown_card_and_writes_nothing(ready_vault):
     ready_vault.add_card("sql-having")
 
-    result = ready_vault.log("review", "no-such-card", "--grade", "good", "--hints", "0")
+    result = ready_vault.log(
+        "review", "no-such-card", "--grade", "good", "--hints", "0"
+    )
 
     assert result.code != 0
     assert "no-such-card" in result.stderr
@@ -34,23 +45,39 @@ def test_log_review_refuses_unknown_card_and_writes_nothing(ready_vault):
 def test_log_review_refuses_invalid_grade_and_writes_nothing(ready_vault):
     ready_vault.add_card("sql-having")
 
-    result = ready_vault.log("review", "sql-having", "--grade", "perfect", "--hints", "0")
+    result = ready_vault.log(
+        "review", "sql-having", "--grade", "perfect", "--hints", "0"
+    )
 
     assert result.code != 0
     assert ready_vault.log_lines() == []
 
 
-def test_log_review_starts_a_new_line_even_if_the_file_lacks_a_trailing_newline(ready_vault):
+def test_log_review_starts_a_new_line_even_if_the_file_lacks_a_trailing_newline(
+    ready_vault,
+):
     ready_vault.add_card("sql-having")
     first = '{"event": "review", "card": "sql-having", "at": "2026-11-01T09:00:00+08:00", "grade": "good", "hints": 0}'
     ready_vault.log_path.write_text(first)
 
-    result = ready_vault.log("review", "sql-having", "--grade", "good", "--hints", "0", "--at", "2026-11-02T09:00:00+08:00")
+    result = ready_vault.log(
+        "review",
+        "sql-having",
+        "--grade",
+        "good",
+        "--hints",
+        "0",
+        "--at",
+        "2026-11-02T09:00:00+08:00",
+    )
 
     assert result.code == 0, result.stderr
     lines = ready_vault.log_lines()
     assert lines[0] == first
-    assert [json.loads(line)["at"] for line in lines] == ["2026-11-01T09:00:00+08:00", "2026-11-02T09:00:00+08:00"]
+    assert [json.loads(line)["at"] for line in lines] == [
+        "2026-11-01T09:00:00+08:00",
+        "2026-11-02T09:00:00+08:00",
+    ]
 
 
 def test_log_review_refuses_to_write_when_the_existing_log_is_corrupt(ready_vault):
@@ -80,7 +107,16 @@ def test_log_review_defaults_at_to_now_with_a_timezone(ready_vault):
 def test_log_review_refuses_at_without_timezone(ready_vault):
     ready_vault.add_card("sql-having")
 
-    result = ready_vault.log("review", "sql-having", "--grade", "good", "--hints", "0", "--at", "2026-11-03T21:15:00")
+    result = ready_vault.log(
+        "review",
+        "sql-having",
+        "--grade",
+        "good",
+        "--hints",
+        "0",
+        "--at",
+        "2026-11-03T21:15:00",
+    )
 
     assert result.code != 0
     assert ready_vault.log_lines() == []

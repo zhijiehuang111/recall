@@ -4,14 +4,13 @@
 排程狀態每次重播算出、不落地。
 """
 
-from __future__ import annotations
-
 import json
 import re
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import NoReturn
 
 # 腳本只讀這幾個 frontmatter 欄位，且只認單行 `key: value`；其餘行一律略過。
 _FIELD = re.compile(r"^(type|created|topic|capstone):[ \t]*(.*?)[ \t]*$")
@@ -37,7 +36,9 @@ def parse_timestamp(value: str) -> datetime:
 def find_recall_dir(vault: Path) -> Path:
     recall = vault / "recall"
     if not recall.is_dir():
-        raise VaultError(f"找不到 {recall}/：請在 Vault 根目錄執行，或用 --vault 指定 Vault 根目錄。")
+        raise VaultError(
+            f"找不到 {recall}/：請在 Vault 根目錄執行，或用 --vault 指定 Vault 根目錄。"
+        )
     return recall
 
 
@@ -115,13 +116,17 @@ def read_events(recall: Path) -> list[dict]:
     if not path.exists():
         return []
     events = []
-    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+    for number, line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(), start=1
+    ):
         if not line.strip():
             continue
         try:
             event = json.loads(line)
         except json.JSONDecodeError as err:
-            raise VaultError(f"{path} 第 {number} 行不是合法的 JSON：{err.msg}") from err
+            raise VaultError(
+                f"{path} 第 {number} 行不是合法的 JSON：{err.msg}"
+            ) from err
         if not isinstance(event, dict):
             raise VaultError(f"{path} 第 {number} 行不是 JSON 物件")
         if event.get("event") not in _KNOWN_EVENTS:
@@ -184,6 +189,6 @@ def append_event(recall: Path, event: dict) -> None:
         f.write(line.encode("utf-8"))
 
 
-def fail(err: VaultError) -> None:
+def fail(err: VaultError) -> NoReturn:
     print(err, file=sys.stderr)
     sys.exit(1)
