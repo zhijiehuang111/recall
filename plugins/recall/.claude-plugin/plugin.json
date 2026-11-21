@@ -1,0 +1,9 @@
+{
+  "name": "recall",
+  "version": "0.1.0",
+  "description": "讓 agent 當教練而不是答案機：測程度、考你、聽你講、排間隔複習。學習紀錄存在你自己的 Vault。",
+  "author": {
+    "name": "zhijiehuang"
+  },
+  "keywords": ["learning", "spaced-repetition", "coaching"]
+}

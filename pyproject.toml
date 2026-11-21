@@ -1,0 +1,15 @@
+# 只服務開發環境（測試）；plugin 本體在 plugins/recall/，不會用到這個檔。
+[project]
+name = "recall-dev"
+version = "0.0.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

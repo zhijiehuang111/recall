@@ -1,0 +1,14 @@
+{
+  "name": "recall",
+  "description": "Recall：讓 agent 當教練的間隔複習學習流程",
+  "owner": {
+    "name": "zhijiehuang"
+  },
+  "plugins": [
+    {
+      "name": "recall",
+      "source": "./plugins/recall",
+      "description": "每日 Session、開新 Topic、建卡的 skills 與排程腳本"
+    }
+  ]
+}
