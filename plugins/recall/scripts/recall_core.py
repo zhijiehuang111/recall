@@ -1,4 +1,4 @@
-"""`due` 與 `log` 共用的 Vault 資料存取。只用標準函式庫。
+"""plugin 腳本共用的 Vault 資料存取與錯誤處理。只用標準函式庫。
 
 資料契約見 repo 的 docs/design.md 與 ADR 0001：`reviews.jsonl` 是排程的唯一真相來源，
 排程狀態每次重播算出、不落地。

@@ -1,6 +1,6 @@
 """指令列測試的共用工具：在暫存目錄建假 Vault，用 `uv run` 跑 plugin 腳本。
 
-測試只看 stdout 的 JSON、結束狀態與 `reviews.jsonl` 內容，不 import 腳本內部。
+測試只看 stdout 的 JSON、結束狀態與腳本寫進 Vault 的檔案，不 import 腳本內部。
 """
 
 import json
@@ -80,6 +80,9 @@ class Vault:
 
     def log(self, *args: str, cwd: Path | None = None) -> Result:
         return run_script("log", *args, cwd=cwd or self.root)
+
+    def init_script(self, *args: str, cwd: Path | None = None) -> Result:
+        return run_script("init", *args, cwd=cwd or self.root)
 
 
 @pytest.fixture

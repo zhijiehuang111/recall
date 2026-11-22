@@ -33,15 +33,7 @@ recall/
 ## 排程與評分
 
 - 演算法：簡化 SM-2，可替換。
-- agent 依作答過程評 Grade，需說明理由，使用者可推翻：
-
-| Grade | 條件 |
-|---|---|
-| Again（= Lapse） | 進入 Teaching，或被指出錯誤後仍補不起來 |
-| Hard | 用了 Hint 才答出，或漏了要點 |
-| Good | 沒用 Hint，Rubric 要點都有 |
-| Easy | 沒用 Hint、完整，且有正確延伸 |
-
+- agent 依作答過程評 Grade，需說明理由，使用者可推翻；四級的條件以 plugin 的 [`references/grading.md`](../plugins/recall/references/grading.md) 為準。
 - 同一 Session 內 Lapse 的卡最後再考一次；下一 Session 先考 Lapse / Hard 的卡。
 - 作答暴露出的 Gap，經同意後建新卡。
 - 非 Good / Easy 的作答附一句 `note`，只描述缺口、不寫正確答案；下次考同一張卡時 agent 據此追問（追問計入 Hint），同一缺口反覆出現時提議獨立成卡。
@@ -69,7 +61,7 @@ recall/
 - **`recall-topic`**：開新 Topic。訪談（一次一題）→ Placement Quiz（3–5 題，答好的直接成卡並從較長間隔起算）→ 計畫（目的地、順序、先不學什麼）→ 建立 Capstone Card 與它需要的前置卡。agent 自行出題時，以 roadmap（預設 roadmap.sh Backend / Full Stack / AI Engineer，可加 JD 或題庫）當地圖：依 Target Role 挑節點快速測驗找弱點，再把弱點改寫成「真的想知道答案的問題」。
 - **`recall-card`**：從筆記或面試題提議卡片；面試題太大就拆。
 - 首次執行時若無 `recall/`，自動建立並產生預設 `config.toml`。
-- 腳本：`due.py`（依時間預算列今日卡）、`log.py`（寫入一筆事件）。
+- 腳本：`init.py`（建立 `recall/` 與預設 `config.toml`）、`due.py`（依時間預算列今日卡）、`log.py`（寫入一筆事件）。
 - Hint / Teaching / 評分等規則以參考檔拆分，不拆成獨立 skill；「教練鐵則」寫在 `recall` 主檔，評分規則放在 plugin 共用位置，`recall` 與 `recall-topic` 共用。
 
 ## Topic 狀態
