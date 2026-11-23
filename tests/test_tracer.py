@@ -19,7 +19,7 @@ def test_reviewed_card_leaves_todays_list_and_comes_back_the_next_day(ready_vaul
         "--hints",
         "0",
         "--at",
-        "2026-11-03T21:15:00+08:00",
+        "2026-11-03",
     )
     assert logged.code == 0, logged.stderr
 
@@ -55,7 +55,7 @@ def test_overdue_card_stays_listed_with_its_original_due_date(ready_vault):
         "--hints",
         "3",
         "--at",
-        "2026-11-03T08:00:00+08:00",
+        "2026-11-03",
     )
 
     cards = ready_vault.due("--today", "2026-11-09").json()["cards"]
@@ -82,7 +82,7 @@ def test_latest_review_decides_the_due_date(ready_vault):
         "--hints",
         "0",
         "--at",
-        "2026-11-03T08:00:00+08:00",
+        "2026-11-03",
     )
     ready_vault.log(
         "review",
@@ -92,7 +92,7 @@ def test_latest_review_decides_the_due_date(ready_vault):
         "--hints",
         "0",
         "--at",
-        "2026-11-04T08:00:00+08:00",
+        "2026-11-04",
     )
 
     # 第二次 Good → 6 天後
@@ -114,7 +114,7 @@ def test_log_reports_the_cards_next_due_date(ready_vault):
         "--hints",
         "0",
         "--at",
-        "2026-11-03T21:15:00+08:00",
+        "2026-11-03",
     )
 
     assert result.code == 0, result.stderr

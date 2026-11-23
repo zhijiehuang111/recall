@@ -72,7 +72,7 @@ def test_due_reads_only_single_line_fields_and_skips_lines_it_does_not_understan
 def test_due_reports_which_log_line_is_broken(ready_vault):
     ready_vault.add_card("sql-having")
     ready_vault.log_path.write_text(
-        '{"event": "review", "card": "sql-having", "at": "2026-11-03T08:00:00+08:00", "grade": "good", "hints": 0}\n'
+        '{"event": "review", "card": "sql-having", "at": "2026-11-03", "grade": "good", "hints": 0}\n'
         '{"event": "review", "card": "sql-having", "grade": "good", "hints": 0}\n'
     )
 
@@ -97,7 +97,7 @@ def test_due_ignores_event_types_it_does_not_know(ready_vault):
 def test_due_reports_a_review_with_an_unknown_grade(ready_vault):
     ready_vault.add_card("sql-having")
     ready_vault.log_path.write_text(
-        '{"event": "review", "card": "sql-having", "at": "2026-11-03T08:00:00+08:00", "grade": "perfect", "hints": 0}\n'
+        '{"event": "review", "card": "sql-having", "at": "2026-11-03", "grade": "perfect", "hints": 0}\n'
     )
 
     result = ready_vault.due("--today", "2026-11-05")
@@ -105,3 +105,15 @@ def test_due_reports_a_review_with_an_unknown_grade(ready_vault):
     assert result.code != 0
     assert "第 1 行" in result.stderr
     assert "perfect" in result.stderr
+
+
+def test_due_reports_a_log_line_whose_at_is_not_a_date(ready_vault):
+    ready_vault.add_card("sql-having")
+    ready_vault.log_path.write_text(
+        '{"event": "review", "card": "sql-having", "at": "2026-11-03T08:00:00+08:00", "grade": "good", "hints": 0}\n'
+    )
+
+    result = ready_vault.due("--today", "2026-11-05")
+
+    assert result.code != 0
+    assert "第 1 行" in result.stderr

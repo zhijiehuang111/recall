@@ -4,7 +4,6 @@
 """
 
 import json
-import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,9 +11,6 @@ from pathlib import Path
 import pytest
 
 SCRIPTS = Path(__file__).resolve().parent.parent / "plugins" / "recall" / "scripts"
-
-# 固定本地時區，讓「今天」與 `at` 換算日期的結果不受跑測試的機器影響。
-TZ = "Asia/Taipei"
 
 
 @dataclass
@@ -28,11 +24,9 @@ class Result:
 
 
 def run_script(name: str, *args: str, cwd: Path) -> Result:
-    env = {**os.environ, "TZ": TZ}
     proc = subprocess.run(
         ["uv", "run", "--quiet", str(SCRIPTS / f"{name}.py"), *args],
         cwd=cwd,
-        env=env,
         capture_output=True,
         text=True,
         check=False,  # 測試要自己斷言 exit code

@@ -28,7 +28,7 @@ recall/
 
 - 排程狀態不落地，由 `reviews.jsonl` 重播算出（[ADR 0001](adr/0001-schedule-derived-from-review-log.md)）。
 - Card ID 為英文 slug，建立後不可改。
-- 「今天」以本地時間午夜換日。
+- 紀錄只記日期（`YYYY-MM-DD`），不記時間與時區；「今天」就是電腦上的日期。
 
 ## 排程與評分
 

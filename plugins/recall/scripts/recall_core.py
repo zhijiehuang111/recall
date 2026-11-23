@@ -9,7 +9,7 @@ import math
 import re
 import sys
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from pathlib import Path
 from typing import NoReturn
 
@@ -23,15 +23,17 @@ class VaultError(Exception):
     """使用者看得懂的錯誤；由腳本印到 stderr 並以非零狀態結束。"""
 
 
-def parse_timestamp(value: str) -> datetime:
-    """解析 ISO 8601 時間；必須含時區。"""
+_DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+
+def parse_day(value: str) -> date:
+    """解析 `YYYY-MM-DD` 日期；紀錄只記日期，不記時間與時區。"""
     try:
-        at = datetime.fromisoformat(value)
+        if _DAY.fullmatch(value):
+            return date.fromisoformat(value)
     except ValueError:
-        raise ValueError(f"不是 ISO 8601 時間：{value}") from None
-    if at.tzinfo is None:
-        raise ValueError(f"時間缺少時區（例如 +08:00）：{value}")
-    return at
+        pass
+    raise ValueError(f"不是 YYYY-MM-DD 日期：{value}")
 
 
 def find_recall_dir(vault: Path) -> Path:
@@ -146,7 +148,7 @@ def _event_problem(event: dict) -> str | None:
     if not isinstance(at, str):
         return "缺少字串欄位 at"
     try:
-        parse_timestamp(at)
+        parse_day(at)
     except ValueError as err:
         return f"at {err}"
     if event["event"] == "review" and event.get("grade") not in GRADES:
@@ -173,7 +175,7 @@ def schedule(events: list[dict]) -> dict[str, CardState]:
 
     input：`reviews.jsonl` 每一行讀成的 dict，照檔案順序：
         [
-            {"event": "review", "card": "sql-having", "at": "2026-11-01T09:00:00+08:00",
+            {"event": "review", "card": "sql-having", "at": "2026-11-01",
              "grade": "good", "hints": 0},
             ...
         ]
@@ -189,7 +191,7 @@ def schedule(events: list[dict]) -> dict[str, CardState]:
         if event["event"] == "reset":
             states.pop(event["card"], None)
             continue
-        card, reviewed_on = event["card"], local_date(event["at"])
+        card, reviewed_on = event["card"], date.fromisoformat(event["at"])
         state = states.get(card)
         # 同一天只算第一次作答；之後的再考照樣留在紀錄裡，但不影響排程。
         if state is not None and state.reviewed_on == reviewed_on:
@@ -240,11 +242,6 @@ def _next_state(state: CardState | None, grade: str, reviewed_on: date) -> CardS
 def _days(interval: float) -> int:
     """間隔四捨五入成整數天（.5 進位），至少 1 天。"""
     return max(1, math.floor(interval + 0.5))
-
-
-def local_date(at: str) -> date:
-    """`at`（ISO 8601 含時區）換算成本地時區的日期；本地午夜換日。"""
-    return datetime.fromisoformat(at).astimezone().date()
 
 
 def append_event(recall: Path, event: dict) -> None:
