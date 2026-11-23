@@ -1,4 +1,4 @@
-"""整條路徑：建卡 → due → log → due。此階段排程規則：任何作答後隔天到期。"""
+"""整條路徑：建卡 → due → log → due。"""
 
 
 def test_reviewed_card_leaves_todays_list_and_comes_back_the_next_day(ready_vault):
@@ -32,12 +32,16 @@ def test_reviewed_card_leaves_todays_list_and_comes_back_the_next_day(ready_vaul
         "type": "recall",
         "kind": "review",
         "due": "2026-11-04",
+        "lapses": 0,
+        "leech": False,
     } in next_day
     assert {
         "card": "cap-theorem",
         "type": "explain",
         "kind": "new",
         "due": "2026-11-02",
+        "lapses": 0,
+        "leech": False,
     } in next_day
 
 
@@ -57,7 +61,14 @@ def test_overdue_card_stays_listed_with_its_original_due_date(ready_vault):
     cards = ready_vault.due("--today", "2026-11-09").json()["cards"]
 
     assert cards == [
-        {"card": "sql-having", "type": "recall", "kind": "review", "due": "2026-11-04"}
+        {
+            "card": "sql-having",
+            "type": "recall",
+            "kind": "review",
+            "due": "2026-11-04",
+            "lapses": 1,
+            "leech": False,
+        }
     ]
 
 
@@ -84,10 +95,11 @@ def test_latest_review_decides_the_due_date(ready_vault):
         "2026-11-04T08:00:00+08:00",
     )
 
-    assert ready_vault.due("--today", "2026-11-04").json()["cards"] == []
+    # 第二次 Good → 6 天後
+    assert ready_vault.due("--today", "2026-11-09").json()["cards"] == []
     assert (
-        ready_vault.due("--today", "2026-11-05").json()["cards"][0]["due"]
-        == "2026-11-05"
+        ready_vault.due("--today", "2026-11-10").json()["cards"][0]["due"]
+        == "2026-11-10"
     )
 
 

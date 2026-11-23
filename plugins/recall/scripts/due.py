@@ -14,6 +14,7 @@ from pathlib import Path
 
 from recall_core import (
     Card,
+    CardState,
     VaultError,
     fail,
     find_recall_dir,
@@ -23,12 +24,18 @@ from recall_core import (
 )
 
 
-def _entry(card: Card, kind: str, due: date | None) -> dict:
+def _entry(card: Card, state: CardState | None) -> dict:
+    if state is None:
+        kind, due, lapses, leech = "new", card.created, 0, False
+    else:
+        kind, due, lapses, leech = "review", state.due, state.lapses, state.leech
     return {
         "card": card.id,
         "type": card.type,
         "kind": kind,
         "due": due and due.isoformat(),
+        "lapses": lapses,
+        "leech": leech,
     }
 
 
@@ -56,10 +63,8 @@ def main() -> None:
     cards = []
     for card in read_cards(recall):
         state = states.get(card.id)
-        if state is None:
-            cards.append(_entry(card, "new", card.created))
-        elif state.due <= args.today:
-            cards.append(_entry(card, "review", state.due))
+        if state is None or state.due <= args.today:
+            cards.append(_entry(card, state))
     print(
         json.dumps(
             {"today": args.today.isoformat(), "cards": cards}, ensure_ascii=False

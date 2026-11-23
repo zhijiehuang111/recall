@@ -81,6 +81,14 @@ class Vault:
     def log(self, *args: str, cwd: Path | None = None) -> Result:
         return run_script("log", *args, cwd=cwd or self.root)
 
+    def review(self, card_id: str, grade: str, at: str, *, hints: int = 0) -> Result:
+        return self.log(
+            "review", card_id, "--grade", grade, "--hints", str(hints), "--at", at
+        )
+
+    def reset(self, card_id: str, at: str) -> Result:
+        return self.log("reset", card_id, "--at", at)
+
     def init_script(self, *args: str, cwd: Path | None = None) -> Result:
         return run_script("init", *args, cwd=cwd or self.root)
 

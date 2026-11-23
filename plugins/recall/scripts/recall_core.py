@@ -5,6 +5,7 @@
 """
 
 import json
+import math
 import re
 import sys
 from dataclasses import dataclass
@@ -148,26 +149,97 @@ def _event_problem(event: dict) -> str | None:
         parse_timestamp(at)
     except ValueError as err:
         return f"at {err}"
+    if event["event"] == "review" and event.get("grade") not in GRADES:
+        return f"grade 必須是 {'、'.join(GRADES)} 之一：{event.get('grade')}"
     return None
 
 
 @dataclass(frozen=True)
 class CardState:
+    reviewed_on: date
     due: date
+    interval: int
+    ease: float
+    reviews: int
+    lapses: int
+
+    @property
+    def leech(self) -> bool:
+        return self.lapses >= LEECH_LAPSES
 
 
 def schedule(events: list[dict]) -> dict[str, CardState]:
     """依序重播事件，算出每張作答過的卡目前的排程狀態；沒出現在結果裡的卡就是新卡。
 
-    排程演算法只藏在這裡。目前是 tracer bullet 規則：任何作答後隔天到期。
+    input：`reviews.jsonl` 每一行讀成的 dict，照檔案順序：
+        [
+            {"event": "review", "card": "sql-having", "at": "2026-11-01T09:00:00+08:00",
+             "grade": "good", "hints": 0},
+            ...
+        ]
+    output：Card ID → 這張卡目前的 `CardState`。
+        {
+            "sql-having": CardState(
+            ...
+            ),
+        }
     """
     states: dict[str, CardState] = {}
     for event in events:
-        if event.get("event") != "review":
+        if event["event"] == "reset":
+            states.pop(event["card"], None)
             continue
-        reviewed_on = local_date(event["at"])
-        states[event["card"]] = CardState(due=reviewed_on + timedelta(days=1))
+        card, reviewed_on = event["card"], local_date(event["at"])
+        state = states.get(card)
+        # 同一天只算第一次作答；之後的再考照樣留在紀錄裡，但不影響排程。
+        if state is not None and state.reviewed_on == reviewed_on:
+            continue
+        states[card] = _next_state(state, event["grade"], reviewed_on)
     return states
+
+
+LEECH_LAPSES = 3
+INITIAL_EASE = 2.5
+MIN_EASE = 1.3
+
+# 每個 Grade 讓 ease 增減多少；首次作答也套用。
+_EASE_DELTA = {"again": -0.2, "hard": -0.15, "good": 0.0, "easy": 0.15}
+
+
+def _next_state(state: CardState | None, grade: str, reviewed_on: date) -> CardState:
+    if state is None:
+        interval = 4 if grade == "easy" else 1
+        ease, reviews, lapses = INITIAL_EASE, 0, 0
+    else:
+        # 第二次作答 Good 固定 6 天，之後 × ease。
+        good_interval = 6 if state.reviews == 1 else state.interval * state.ease
+        if grade == "again":
+            interval = 1
+        elif grade == "hard":
+            interval = _days(state.interval * 1.2)
+        elif grade == "easy":
+            # 間隔 × ease × 1.3；第二次作答時至少以 Good 的 6 天為底，不會比 Good 早到期。
+            interval = _days(max(good_interval, state.interval * state.ease) * 1.3)
+        else:
+            interval = _days(good_interval)
+        if grade != "again":
+            # ease 低時 1 天 × ease 會四捨五入回 1 天；至少多 1 天，免得卡在每天考。
+            interval = max(interval, state.interval + 1)
+        ease, reviews, lapses = state.ease, state.reviews, state.lapses
+    return CardState(
+        reviewed_on=reviewed_on,
+        due=reviewed_on + timedelta(days=interval),
+        interval=interval,
+        # ease 只以 0.05 為單位增減；取到小數兩位，避免浮點誤差影響四捨五入。
+        ease=max(MIN_EASE, round(ease + _EASE_DELTA[grade], 2)),
+        reviews=reviews + 1,
+        lapses=lapses + (grade == "again"),
+    )
+
+
+def _days(interval: float) -> int:
+    """間隔四捨五入成整數天（.5 進位），至少 1 天。"""
+    return max(1, math.floor(interval + 0.5))
 
 
 def local_date(at: str) -> date:

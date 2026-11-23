@@ -4,9 +4,13 @@
 # ///
 """在 Vault 的 `recall/reviews.jsonl` 追加一筆事件。
 
-用法：uv run log.py [--vault 路徑] review <card-id> --grade again|hard|good|easy --hints N [--at ISO8601]
+用法：
+  uv run log.py [--vault 路徑] review <card-id> --grade again|hard|good|easy --hints N [--at 2026-11-03T21:15:00+08:00]
+  uv run log.py [--vault 路徑] reset <card-id> [--at 2026-11-03T21:15:00+08:00]
 
 `--vault` 是所有子指令共用的選項，要寫在子指令前面。
+
+成功時輸出 JSON：`due` 是這張卡下次到期日；reset 之後卡片視為新卡，`due` 為 null。
 """
 
 import argparse
@@ -44,6 +48,16 @@ def _hints(value: str) -> int:
     return n
 
 
+def _add_card_argument(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("card", help="Card ID（cards/ 下的檔名，不含 .md）")
+
+
+def _add_at_argument(parser: argparse.ArgumentParser, what: str) -> None:
+    parser.add_argument(
+        "--at", type=_timestamp, help=f"{what}，ISO 8601 含時區（預設為現在）"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -54,12 +68,16 @@ def main() -> None:
     commands = parser.add_subparsers(dest="command", required=True)
 
     review = commands.add_parser("review", help="記錄一次作答")
-    review.add_argument("card", help="Card ID（cards/ 下的檔名，不含 .md）")
+    _add_card_argument(review)
     review.add_argument("--grade", required=True, choices=GRADES)
     review.add_argument("--hints", required=True, type=_hints, help="用了幾次 Hint")
-    review.add_argument(
-        "--at", type=_timestamp, help="作答時間，ISO 8601 含時區（預設為現在）"
+    _add_at_argument(review, "作答時間")
+
+    reset = commands.add_parser(
+        "reset", help="重置一張卡的排程；之前的紀錄保留，但不再計入"
     )
+    _add_card_argument(reset)
+    _add_at_argument(reset, "重置時間")
     args = parser.parse_args()
 
     try:
@@ -73,15 +91,16 @@ def main() -> None:
 
     at = args.at or datetime.now().astimezone()
     event = {
-        "event": "review",
+        "event": args.command,
         "card": args.card,
         "at": at.isoformat(timespec="seconds"),
-        "grade": args.grade,
-        "hints": args.hints,
     }
+    if args.command == "review":
+        event |= {"grade": args.grade, "hints": args.hints}
     append_event(recall, event)
-    due = schedule([*events, event])[args.card].due
-    print(json.dumps({"card": args.card, "due": due.isoformat()}, ensure_ascii=False))
+    state = schedule([*events, event]).get(args.card)
+    due = state and state.due.isoformat()
+    print(json.dumps({"card": args.card, "due": due}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

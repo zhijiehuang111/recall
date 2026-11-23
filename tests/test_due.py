@@ -16,8 +16,22 @@ def test_due_lists_never_reviewed_cards_as_new(ready_vault):
 
     assert result.code == 0, result.stderr
     assert sorted(result.json()["cards"], key=lambda c: c["card"]) == [
-        {"card": "cap-theorem", "type": "explain", "kind": "new", "due": "2026-11-03"},
-        {"card": "sql-having", "type": "recall", "kind": "new", "due": "2026-11-02"},
+        {
+            "card": "cap-theorem",
+            "type": "explain",
+            "kind": "new",
+            "due": "2026-11-03",
+            "lapses": 0,
+            "leech": False,
+        },
+        {
+            "card": "sql-having",
+            "type": "recall",
+            "kind": "new",
+            "due": "2026-11-02",
+            "lapses": 0,
+            "leech": False,
+        },
     ]
 
 
@@ -49,6 +63,8 @@ def test_due_reads_only_single_line_fields_and_skips_lines_it_does_not_understan
             "type": "explain",
             "kind": "new",
             "due": "2026-11-05",
+            "lapses": 0,
+            "leech": False,
         },
     ]
 
@@ -76,3 +92,16 @@ def test_due_ignores_event_types_it_does_not_know(ready_vault):
 
     assert result.code == 0, result.stderr
     assert [c["kind"] for c in result.json()["cards"]] == ["new"]
+
+
+def test_due_reports_a_review_with_an_unknown_grade(ready_vault):
+    ready_vault.add_card("sql-having")
+    ready_vault.log_path.write_text(
+        '{"event": "review", "card": "sql-having", "at": "2026-11-03T08:00:00+08:00", "grade": "perfect", "hints": 0}\n'
+    )
+
+    result = ready_vault.due("--today", "2026-11-05")
+
+    assert result.code != 0
+    assert "第 1 行" in result.stderr
+    assert "perfect" in result.stderr

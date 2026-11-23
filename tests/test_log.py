@@ -139,3 +139,43 @@ def test_log_writes_to_the_vault_given_before_the_subcommand(ready_vault, tmp_pa
 
     assert result.code == 0, result.stderr
     assert len(ready_vault.log_lines()) == 1
+
+
+def test_log_reset_appends_exactly_one_reset_event(ready_vault):
+    ready_vault.add_card("sql-having")
+    ready_vault.review("sql-having", "good", "2026-11-01T09:00:00+08:00")
+
+    result = ready_vault.reset("sql-having", "2026-11-03T21:15:00+08:00")
+
+    assert result.code == 0, result.stderr
+    assert result.json() == {"card": "sql-having", "due": None}
+    lines = ready_vault.log_lines()
+    assert len(lines) == 2
+    assert json.loads(lines[1]) == {
+        "event": "reset",
+        "card": "sql-having",
+        "at": "2026-11-03T21:15:00+08:00",
+    }
+
+
+def test_log_reset_refuses_unknown_card_and_writes_nothing(ready_vault):
+    ready_vault.add_card("sql-having")
+
+    result = ready_vault.log("reset", "no-such-card")
+
+    assert result.code != 0
+    assert "no-such-card" in result.stderr
+    assert ready_vault.log_lines() == []
+
+
+def test_log_reset_defaults_at_to_now_with_a_timezone(ready_vault):
+    from datetime import datetime
+
+    ready_vault.add_card("sql-having")
+
+    result = ready_vault.log("reset", "sql-having")
+
+    assert result.code == 0, result.stderr
+    at = datetime.fromisoformat(json.loads(ready_vault.log_lines()[0])["at"])
+    assert at.utcoffset() is not None
+    assert abs((datetime.now().astimezone() - at).total_seconds()) < 60
