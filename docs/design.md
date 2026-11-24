@@ -5,7 +5,7 @@
 ## 核心原則
 
 - agent 是教練不是答案機：只給 Hint；不會時進入 Teaching（換例子講底層概念），之後使用者必須自己重答原題。任何情況都不寫出該卡答案。
-- 使用者作答前，agent 不引用或轉述 Rubric。
+- 使用者作答前，agent 不引用或轉述 Rubric；建卡時也預設不顯示 Rubric（使用者只核可題目與出處），使用者明確要求才給看。
 - agent 只「提議」卡片與 Topic，使用者同意才寫入。
 - 程度一律用測驗判斷，不採自我評估。
 
@@ -58,11 +58,13 @@ recall/
 ## 流程（skills）
 
 - **`recall`**：每日 Session。先追問上次 Application，再考到期卡，最後加新卡。Hint、Teaching、評分、Gap 都在此處理。
-- **`recall-topic`**：開新 Topic。訪談（一次一題）→ Placement Quiz（3–5 題，答好的直接成卡並從較長間隔起算）→ 計畫（目的地、順序、先不學什麼）→ 建立 Capstone Card 與它需要的前置卡。agent 自行出題時，以 roadmap（預設 roadmap.sh Backend / Full Stack / AI Engineer，可加 JD 或題庫）當地圖：依 Target Role 挑節點快速測驗找弱點，再把弱點改寫成「真的想知道答案的問題」。
-- **`recall-card`**：從筆記或面試題提議卡片；面試題太大就拆。
-- 首次執行時若無 `recall/`，自動建立並產生預設 `config.toml`。
+- **`create-topic`**：開新 Topic。訪談（一次一題）→ Placement Quiz（3–5 題，答好的直接成卡並從較長間隔起算）→ 計畫（目的地、順序、先不學什麼）→ 建立 Capstone Card 與它需要的前置卡。agent 自行出題時，以 roadmap（預設 roadmap.sh Backend / Full Stack / AI Engineer，可加 JD 或題庫）當地圖：依 Target Role 挑節點快速測驗找弱點，再把弱點改寫成「真的想知道答案的問題」。
+- **`create-card`**：從筆記或面試題提議卡片；面試題太大就拆。
+- **`edit-card`**：修改既有卡；Card ID 不變，大改時詢問是否 reset。
+- 兩者的範圍上限、Rubric 與出處要求、檔案格式、大改／小改的判斷以 plugin 的 [`references/card-writing.md`](../plugins/recall/references/card-writing.md) 為準，`create-topic` 共用。每個 skill 只做一件事、一個觸發點。
+- 首次執行時若無 `recall/`，自動建立並產生預設 `config.toml`；`recall`、`create-card`、`create-topic` 開頭都照 plugin 的 [`references/vault-setup.md`](../plugins/recall/references/vault-setup.md) 做。
 - 腳本：`init.py`（建立 `recall/` 與預設 `config.toml`）、`due.py`（依時間預算列今日卡）、`log.py`（寫入一筆事件）。
-- Hint / Teaching / 評分等規則以參考檔拆分，不拆成獨立 skill；「教練鐵則」寫在 `recall` 主檔，評分規則放在 plugin 共用位置，`recall` 與 `recall-topic` 共用。
+- Hint / Teaching / 評分等規則以參考檔拆分，不拆成獨立 skill；「教練鐵則」寫在 `recall` 主檔，評分規則放在 plugin 共用位置，`recall` 與 `create-topic` 共用。
 
 ## Topic 狀態
 

@@ -11,15 +11,7 @@ description: 每日 Session：在 Vault 裡一張一張考今天到期的 Card�
 
 ## 1. 準備 Vault
 
-```bash
-uv run "${CLAUDE_PLUGIN_ROOT}/scripts/init.py"
-```
-
-這一步確保 Vault 裡有 `recall/`；已經有了就什麼都不改。
-
-輸出是 `"created": true`，代表這是使用者第一次在這個 Vault 用 recall。用一句話告訴使用者：剛建立了 `recall/`、每日分鐘數等設定在 `recall/config.toml`。輸出是 `"created": false` 就不提，直接往下。
-
-指令回報 `uv: command not found` 時，請使用者照 <https://docs.astral.sh/uv/> 安裝 uv，再結束 Session。
+照 `${CLAUDE_PLUGIN_ROOT}/references/vault-setup.md` 做。
 
 ## 2. 取得今天的卡
 

@@ -1,6 +1,6 @@
 # 評 Grade
 
-`recall` 與 `recall-topic` 共用。使用者作答完成後才評。
+`recall` 與 `create-topic` 共用。使用者作答完成後才評。
 
 ## 四級
 
