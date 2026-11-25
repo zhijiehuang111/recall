@@ -64,7 +64,7 @@ recall/
 - 兩者的範圍上限、Rubric 與出處要求、檔案格式、大改／小改的判斷以 plugin 的 [`references/card-writing.md`](../plugins/recall/references/card-writing.md) 為準，`create-topic` 共用。每個 skill 只做一件事、一個觸發點。
 - 首次執行時若無 `recall/`，自動建立並產生預設 `config.toml`；`recall`、`create-card`、`create-topic` 開頭都照 plugin 的 [`references/vault-setup.md`](../plugins/recall/references/vault-setup.md) 做。
 - 腳本：`init.py`（建立 `recall/` 與預設 `config.toml`）、`due.py`（依時間預算列今日卡）、`log.py`（寫入一筆事件）。
-- Hint / Teaching / 評分等規則以參考檔拆分，不拆成獨立 skill；「教練鐵則」寫在 `recall` 主檔，評分規則放在 plugin 共用位置，`recall` 與 `create-topic` 共用。
+- Hint / Teaching / 評分等規則不拆成獨立 skill：「教練鐵則」與 Hint、Teaching 寫在 `recall` 主檔，評分規則放在 plugin 共用位置，`recall` 與 `create-topic` 共用。
 
 ## Topic 狀態
 
