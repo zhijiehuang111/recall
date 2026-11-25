@@ -41,8 +41,11 @@ class Vault:
 
     def init(self) -> Vault:
         (self.recall / "cards").mkdir(parents=True, exist_ok=True)
-        (self.recall / "config.toml").write_text("daily_minutes = 30\n")
+        self.set_daily_minutes(30)
         return self
+
+    def set_daily_minutes(self, minutes: int) -> None:
+        (self.recall / "config.toml").write_text(f"daily_minutes = {minutes}\n")
 
     def add_card(
         self,

@@ -8,6 +8,7 @@ import json
 import math
 import re
 import sys
+import tomllib
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -43,6 +44,25 @@ def find_recall_dir(vault: Path) -> Path:
             f"找不到 {recall}/：請在 Vault 根目錄執行，或用 --vault 指定 Vault 根目錄。"
         )
     return recall
+
+
+DEFAULT_DAILY_MINUTES = 30
+
+
+def read_daily_minutes(recall: Path) -> int:
+    """`config.toml` 的 `daily_minutes`；沒有設定檔或沒寫這個欄位時用預設值。"""
+    path = recall / "config.toml"
+    if not path.exists():
+        return DEFAULT_DAILY_MINUTES
+    try:
+        config = tomllib.loads(path.read_text(encoding="utf-8"))
+    except tomllib.TOMLDecodeError as err:
+        raise VaultError(f"{path} 不是合法的 TOML：{err}") from err
+    minutes = config.get("daily_minutes", DEFAULT_DAILY_MINUTES)
+    # bool 是 int 的子類別，`daily_minutes = true` 也要擋下來。
+    if not isinstance(minutes, int) or isinstance(minutes, bool) or minutes < 0:
+        raise VaultError(f"{path} 的 daily_minutes 必須是 0 以上的整數：{minutes!r}")
+    return minutes
 
 
 @dataclass(frozen=True)
@@ -164,6 +184,8 @@ class CardState:
     ease: float
     reviews: int
     lapses: int
+    # 最近一次計入排程的 Grade（同日再考不算）。
+    last_grade: str
 
     @property
     def leech(self) -> bool:
@@ -236,6 +258,7 @@ def _next_state(state: CardState | None, grade: str, reviewed_on: date) -> CardS
         ease=max(MIN_EASE, round(ease + _EASE_DELTA[grade], 2)),
         reviews=reviews + 1,
         lapses=lapses + (grade == "again"),
+        last_grade=grade,
     )
 
 
