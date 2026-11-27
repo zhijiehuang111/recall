@@ -5,7 +5,7 @@
 """在 Vault 的 `recall/reviews.jsonl` 追加一筆事件。
 
 用法：
-  uv run log.py [--vault 路徑] review <card-id> --grade again|hard|good|easy --hints N [--at 2026-11-03] [--note 缺口]
+  uv run log.py [--vault 路徑] review <card-id> --grade again|hard|good|easy --hints N [--at 2026-11-03] [--note 缺口] [--placement]
   uv run log.py [--vault 路徑] reset <card-id> [--at 2026-11-03]
 
 `--vault` 是所有子指令共用的選項，要寫在子指令前面。
@@ -71,6 +71,11 @@ def main() -> None:
     review.add_argument("--hints", required=True, type=_hints, help="用了幾次 Hint")
     _add_at_argument(review, "作答日期")
     review.add_argument("--note", help="這次作答的缺口，一句話；不影響排程")
+    review.add_argument(
+        "--placement",
+        action="store_true",
+        help="Placement Quiz 的作答；首次作答 Good / Easy 視同 Easy 起算",
+    )
 
     reset = commands.add_parser(
         "reset", help="重置一張卡的排程；之前的紀錄保留，但不再計入"
@@ -98,6 +103,8 @@ def main() -> None:
         event |= {"grade": args.grade, "hints": args.hints}
         if args.note and args.note.strip():
             event["note"] = args.note
+        if args.placement:
+            event["placement"] = True
     append_event(recall, event)
     state = schedule([*events, event]).get(args.card)
     due = state and state.due.isoformat()

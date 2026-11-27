@@ -176,6 +176,8 @@ def _event_problem(event: dict) -> str | None:
             return f"grade 必須是 {'、'.join(GRADES)} 之一：{event.get('grade')}"
         if not isinstance(event.get("note", ""), str):
             return "note 必須是字串"
+        if not isinstance(event.get("placement", False), bool):
+            return "placement 必須是 true 或 false"
     return None
 
 
@@ -221,7 +223,11 @@ def schedule(events: list[dict]) -> dict[str, CardState]:
         # 同一天只算第一次作答；之後的再考照樣留在紀錄裡，但不影響排程。
         if state is not None and state.reviewed_on == reviewed_on:
             continue
-        states[card] = _next_state(state, event["grade"], reviewed_on)
+        grade = event["grade"]
+        # Placement Quiz 答得好的首次作答視同 Easy，從較長間隔起算。
+        if state is None and event.get("placement") and grade in ("good", "easy"):
+            grade = "easy"
+        states[card] = _next_state(state, grade, reviewed_on)
     return states
 
 

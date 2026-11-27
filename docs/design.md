@@ -58,7 +58,7 @@ recall/
 ## 流程（skills）
 
 - **`recall`**：每日 Session。先追問上次 Application，再考到期卡，最後加新卡。Hint、Teaching、評分、Gap 都在此處理。
-- **`create-topic`**：開新 Topic。訪談（一次一題）→ Placement Quiz（3–5 題，答好的直接成卡並從較長間隔起算）→ 計畫（目的地、順序、先不學什麼）→ 建立 Capstone Card 與它需要的前置卡。agent 自行出題時，以 roadmap（預設 roadmap.sh Backend / Full Stack / AI Engineer，可加 JD 或題庫）當地圖：依 Target Role 挑節點快速測驗找弱點，再把弱點改寫成「真的想知道答案的問題」。
+- **`create-topic`**：開新 Topic。訪談（一次一題）→ Placement Quiz（3–5 題，答好的直接成卡並記 `placement` 作答、從較長間隔起算；答不好的地方寫成新卡、不記作答）→ 計畫（目的地、順序、先不學什麼）→ 建立 Capstone Card 與它需要的前置卡。agent 自行出題時，以 roadmap（預設 roadmap.sh Backend / Full Stack / AI Engineer，可加 JD 或題庫）當地圖：依 Target Role 挑節點快速測驗找弱點，再把弱點改寫成「真的想知道答案的問題」。
 - **`create-card`**：從筆記或面試題提議卡片；面試題太大就拆。
 - **`edit-card`**：修改既有卡；Card ID 不變，大改時詢問是否 reset。
 - 兩者的範圍上限、Rubric 與出處要求、檔案格式、大改／小改的判斷以 plugin 的 [`references/card-writing.md`](../plugins/recall/references/card-writing.md) 為準，`create-topic` 共用。每個 skill 只做一件事、一個觸發點。

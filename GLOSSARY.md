@@ -61,7 +61,7 @@ _Avoid_: 解題, 示範答案, walkthrough
 _Avoid_: 答案, answer key, 標準答案
 
 **Placement Quiz**:
-開新 Topic 時用來判斷起點的 3–5 題測驗；答得好的題目直接成為 Card，並從較長的間隔開始。
+開新 Topic 時用來判斷起點的 3–5 題測驗；答得好的題目直接成為 Card，並從較長的間隔開始；答不好的地方寫成新卡。
 _Avoid_: 程度測驗, pretest, diagnostic
 
 **Session**:

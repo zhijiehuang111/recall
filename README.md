@@ -32,4 +32,6 @@ recall/
 
 要把筆記或面試題做成卡，執行 `/recall:create-card`：agent 提議一組卡、每張附出處，你逐張決定保留、修改或丟棄，同意的才寫入 `recall/`。Rubric 照出處寫好直接藏進 `.rubrics/`，預設不給你看，免得第一次作答變成背答案；想看某張卡的 Rubric 可以直接要求。
 
+要開新 Topic，執行 `/recall:create-topic`：agent 一次問一題了解你的狀況、出 3–5 題 Placement Quiz 測起點，寫出 Topic 計畫，再提議 Capstone Card 與前置卡。答得好的題目直接成卡、從較長的間隔起算；沒有想學的問題時，agent 依 `config.toml` 的 Target Role 與 roadmap 幫你找弱點。同時最多 2 個 active Topic。
+
 要修改既有卡，執行 `/recall:edit-card`：Card ID 不變，題目或 Rubric 大改時會問你要不要重置排程。
