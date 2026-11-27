@@ -38,18 +38,20 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/due.py"
    ```
 
    不存在就告訴使用者這張卡缺 `recall/.rubrics/<card>.md`、這次先跳過，接著處理下一張。
-3. 讀 `recall/cards/<card>.md`，把題目講給使用者，然後停下來等作答。一則訊息只出一張卡。
+3. 讀 `recall/cards/<card>.md`，把題目講給使用者，然後停下來等作答。一則訊息只出一張卡。作答前不提這張卡的 `notes`。
 4. 使用者卡住或直接要答案時給一層 Hint，依序是方向 → 關鍵概念 → 去哪裡查（卡片的 `source`），記下給了幾次。每層只給一點：使用者照著 Hint 就能直接說出答案，就是給太多。
 5. 使用者放棄、完全不會，或三層 Hint 都給了仍答不出來時進入 Teaching：用和這張卡不同的例子講底層概念，或請使用者讀出處，然後請使用者重答原題。這張卡這次是 `again`。
-6. 使用者說答完了，才讀 `recall/.rubrics/<card>.md`，照 `${CLAUDE_PLUGIN_ROOT}/references/grading.md` 評 Grade：每張卡評分前都先讀它。
+6. 使用者說答完了，作答沒涵蓋 `notes` 裡的缺口就追問，追問計入 Hint 次數。之後才讀 `recall/.rubrics/<card>.md`，照 `${CLAUDE_PLUGIN_ROOT}/references/grading.md` 評 Grade：每張卡評分前都先讀它。
 7. 使用者確認 Grade（或給了自己的 Grade）之後，寫入紀錄：
 
    ```bash
-   uv run "${CLAUDE_PLUGIN_ROOT}/scripts/log.py" review <card> --grade <again|hard|good|easy> --hints <N>
+   uv run "${CLAUDE_PLUGIN_ROOT}/scripts/log.py" review <card> --grade <again|hard|good|easy> --hints <N> [--note "<缺口>"]
    ```
 
+   Grade 不是 `good` / `easy` 時加 `--note`，一句話只寫缺口，不寫正確答案。
+
    輸出的 `due` 是下次考這張卡的日期，順口告訴使用者。指令失敗時把錯誤原文給使用者看，不要跳過這張卡繼續。
-8. 作答暴露出沒有卡涵蓋的 Gap 時，用一句話提議建卡；使用者同意就記下、收尾時建。
+8. 作答暴露出沒有卡涵蓋的 Gap，或同一缺口在 `notes` 裡反覆出現時，用一句話提議建卡；使用者同意就記下、收尾時建。
 
 ## 4. 再考 Lapse 的卡
 

@@ -24,6 +24,7 @@ def test_due_lists_never_reviewed_cards_as_new(ready_vault):
             "due": "2026-11-03",
             "lapses": 0,
             "leech": False,
+            "notes": [],
         },
         {
             "card": "sql-having",
@@ -33,6 +34,7 @@ def test_due_lists_never_reviewed_cards_as_new(ready_vault):
             "due": "2026-11-02",
             "lapses": 0,
             "leech": False,
+            "notes": [],
         },
     ]
 
@@ -68,6 +70,7 @@ def test_due_reads_only_single_line_fields_and_skips_lines_it_does_not_understan
             "due": "2026-11-05",
             "lapses": 0,
             "leech": False,
+            "notes": [],
         },
     ]
 

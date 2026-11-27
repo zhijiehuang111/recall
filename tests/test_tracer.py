@@ -35,6 +35,7 @@ def test_reviewed_card_leaves_todays_list_and_comes_back_the_next_day(ready_vaul
         "due": "2026-11-04",
         "lapses": 0,
         "leech": False,
+        "notes": [],
     } in next_day
     assert {
         "card": "cap-theorem",
@@ -44,6 +45,7 @@ def test_reviewed_card_leaves_todays_list_and_comes_back_the_next_day(ready_vaul
         "due": "2026-11-02",
         "lapses": 0,
         "leech": False,
+        "notes": [],
     } in next_day
 
 
@@ -71,6 +73,7 @@ def test_overdue_card_stays_listed_with_its_original_due_date(ready_vault):
             "due": "2026-11-04",
             "lapses": 1,
             "leech": False,
+            "notes": [],
         }
     ]
 

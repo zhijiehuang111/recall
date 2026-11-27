@@ -171,8 +171,11 @@ def _event_problem(event: dict) -> str | None:
         parse_day(at)
     except ValueError as err:
         return f"at {err}"
-    if event["event"] == "review" and event.get("grade") not in GRADES:
-        return f"grade 必須是 {'、'.join(GRADES)} 之一：{event.get('grade')}"
+    if event["event"] == "review":
+        if event.get("grade") not in GRADES:
+            return f"grade 必須是 {'、'.join(GRADES)} 之一：{event.get('grade')}"
+        if not isinstance(event.get("note", ""), str):
+            return "note 必須是字串"
     return None
 
 
@@ -265,6 +268,20 @@ def _next_state(state: CardState | None, grade: str, reviewed_on: date) -> CardS
 def _days(interval: float) -> int:
     """間隔四捨五入成整數天（.5 進位），至少 1 天。"""
     return max(1, math.floor(interval + 0.5))
+
+
+RECENT_NOTES = 3
+
+
+def recent_notes(events: list[dict]) -> dict[str, list[str]]:
+    """每張卡自最近一次 reset 以來、最近幾筆非空 `note`，最新的在前；沒有 note 的卡不出現。"""
+    notes: dict[str, list[str]] = {}
+    for event in events:
+        if event["event"] == "reset":
+            notes.pop(event["card"], None)
+        elif event.get("note", "").strip():
+            notes.setdefault(event["card"], []).append(event["note"])
+    return {card: found[-RECENT_NOTES:][::-1] for card, found in notes.items()}
 
 
 def append_event(recall: Path, event: dict) -> None:

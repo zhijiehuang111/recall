@@ -176,3 +176,41 @@ def test_log_reset_defaults_at_to_today(ready_vault):
 
     assert result.code == 0, result.stderr
     assert json.loads(ready_vault.log_lines()[0])["at"] in {before, after}
+
+
+def test_log_review_writes_the_note_as_given(ready_vault):
+    ready_vault.add_card("sql-having")
+
+    result = ready_vault.log(
+        "review",
+        "sql-having",
+        "--grade",
+        "hard",
+        "--hints",
+        "1",
+        "--at",
+        "2026-11-03",
+        "--note",
+        '沒講到 HAVING 在 GROUP BY 之後才跑，"WHERE" 也講反',
+    )
+
+    assert result.code == 0, result.stderr
+    assert json.loads(ready_vault.log_lines()[0]) == {
+        "event": "review",
+        "card": "sql-having",
+        "at": "2026-11-03",
+        "grade": "hard",
+        "hints": 1,
+        "note": '沒講到 HAVING 在 GROUP BY 之後才跑，"WHERE" 也講反',
+    }
+
+
+def test_log_review_omits_a_blank_note(ready_vault):
+    ready_vault.add_card("sql-having")
+
+    result = ready_vault.log(
+        "review", "sql-having", "--grade", "good", "--hints", "0", "--note", "  "
+    )
+
+    assert result.code == 0, result.stderr
+    assert "note" not in json.loads(ready_vault.log_lines()[0])

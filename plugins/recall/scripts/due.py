@@ -7,6 +7,7 @@
 到期的卡（review）一律列出：上次 Again / Hard 的先，其餘逾期越久越前。
 從未作答的新卡（new）依 created 先後，放得進 `config.toml` 的 `daily_minutes`
 剩餘預算才加。預估分鐘：Recall 3、Explain 5、Build 30。
+`notes` 是自最近一次 reset 以來最近 3 筆作答 note，最新的在前。
 
 用法：uv run due.py [--vault 路徑] [--today YYYY-MM-DD]
 """
@@ -25,6 +26,7 @@ from recall_core import (
     read_cards,
     read_daily_minutes,
     read_events,
+    recent_notes,
     schedule,
 )
 
@@ -37,7 +39,7 @@ def _minutes(card: Card) -> int:
     return MINUTES.get(card.type or "", MINUTES["recall"])
 
 
-def _entry(card: Card, state: CardState | None) -> dict:
+def _entry(card: Card, state: CardState | None, notes: list[str]) -> dict:
     if state is None:
         kind, due, lapses, leech = "new", card.created, 0, False
     else:
@@ -50,6 +52,7 @@ def _entry(card: Card, state: CardState | None) -> dict:
         "due": due and due.isoformat(),
         "lapses": lapses,
         "leech": leech,
+        "notes": notes,
     }
 
 
@@ -71,9 +74,11 @@ def main() -> None:
     try:
         recall = find_recall_dir(args.vault)
         daily_minutes = read_daily_minutes(recall)
-        states = schedule(read_events(recall))
+        events = read_events(recall)
     except VaultError as err:
         fail(err)
+    states = schedule(events)
+    notes = recent_notes(events)
 
     due_cards: list[tuple[Card, CardState]] = []
     new_cards: list[Card] = []
@@ -92,7 +97,7 @@ def main() -> None:
             pair[0].id,
         )
     )
-    reviews = [_entry(card, state) for card, state in due_cards]
+    reviews = [_entry(card, state, notes.get(card.id, [])) for card, state in due_cards]
 
     # 到期卡一律列出（即使超出預算）；新卡依 created 先後，放得進剩餘預算才加，
     # 放不下的跳過、繼續往後找。沒寫 created 的新卡排最後。
@@ -101,7 +106,7 @@ def main() -> None:
     new_cards.sort(key=lambda c: (c.created is None, c.created or args.today, c.id))
     for card in new_cards:
         if planned + _minutes(card) <= daily_minutes:
-            cards.append(_entry(card, None))
+            cards.append(_entry(card, None, []))
             planned += _minutes(card)
 
     print(
