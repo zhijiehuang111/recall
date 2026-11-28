@@ -12,14 +12,17 @@ description: 每日 Session：在 Vault 裡一張一張考今天到期的 Card�
 3. 跑 `uv run "${CLAUDE_PLUGIN_ROOT}/scripts/due.py"`，輸出的 `cards` 就是考試順序。
 4. 一次考一張：
    - `leech` 為 `true` 的卡先不考，跟使用者討論拆小、改寫或補前置卡。
+   - Build Card 先建練習目錄 `recall/workspace/<card>/<今天 YYYY-MM-DD>/`，已存在就沿用（同一天中斷後接著做）；同卡有之前日期的目錄就告訴使用者在哪，要對照或刪掉由使用者自己決定，你不刪任何練習目錄。
    - 讀 `recall/cards/<card>.md` 出題，等使用者作答；作答前不提 `notes`。
+   - Build Card 連驗收條件一起給使用者看，請使用者在這次的練習目錄裡實作；你不寫、不改練習目錄裡的程式，Teaching 後也是使用者在同一目錄接著做。
    - 卡住時給一層 Hint，依序是方向 → 關鍵概念 → 去哪裡查，每層只給一點。
    - 放棄或三層 Hint 都答不出時 Teaching：換個例子講底層概念，再請使用者重答原題，這次評 `again`。
    - 答完後，沒涵蓋 `notes` 裡的缺口就追問，追問算一次 Hint。
+   - Build Card 在使用者說完成後，到這次的練習目錄執行或檢查每條驗收條件。
    - 讀 `recall/.rubrics/<card>.md`，照 `${CLAUDE_PLUGIN_ROOT}/references/grading.md` 評 Grade。
    - 記錄：`uv run "${CLAUDE_PLUGIN_ROOT}/scripts/log.py" review <card> --grade <grade> --hints <N> [--note "<缺口>"]`；不是 `good` / `easy` 時加 `--note`，只寫缺口、不寫答案。
    - 發現沒有卡涵蓋的 Gap、或 `notes` 裡同一缺口反覆出現時，提議建卡。
    - `capstone: true` 的卡評 `good` / `easy`、且它的 Topic 還不是 `status: done` 時，把 Topic 改成 `status: done`。
-5. 其他卡考完後，這次評 `again` 的卡再考一次。
+5. 其他卡考完後，這次評 `again` 的卡再考一次；Build Card 不重考，等排程。
 6. 這次有原本 `active` 的 Topic 完成時，依該 Topic 與 `recall/config.toml` 的 `target_roles` 提 2–3 個 30 分鐘內做得完的 Application，使用者可選、改或跳過；選定就寫進 Topic 本文 `## Application`，frontmatter 加 `application_due: <今天 + 2 天>`。接著提議下一個可能的 Topic，要開的話請使用者用 `create-topic`。
 7. 收尾：摘要考了哪些、各自的 Grade 與缺口。有提議要建的卡或要處理的 Leech，問使用者現在處理（呼叫 `create-card` 或 `edit-card` skill）還是改天。

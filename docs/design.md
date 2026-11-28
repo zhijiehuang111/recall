@@ -22,7 +22,7 @@ recall/
   topics/<topic>.md        ← 目的地、先不學什麼、Application、狀態
   cards/<card-id>.md       ← 題目、type、topic、capstone、出處
   .rubrics/<card-id>.md    ← Rubric（點開頭資料夾，避免作答前看到）
-  workspace/<card-id>/     ← Build Card 的練習目錄，每次複習從空目錄重做
+  workspace/<card-id>/<日期>/ ← Build Card 的練習目錄，每次作答開新的；舊的由使用者決定留或刪
   reviews.jsonl            ← 作答／reset 事件，只追加
 ```
 
