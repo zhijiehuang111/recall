@@ -7,6 +7,8 @@
 到期的卡（review）一律列出：上次 Again / Hard 的先，其餘逾期越久越前。
 從未作答的新卡（new）依 created 先後，放得進 `config.toml` 的 `daily_minutes`
 剩餘預算才加。預估分鐘：Recall 3、Explain 5、Build 30。
+Topic 為 paused / done 的新卡不列；Capstone Card 要等同 Topic 其他卡自 reset 以來
+都有非 Again 作答才列。
 `notes` 是自最近一次 reset 以來最近 3 筆作答 note，最新的在前。
 
 用法：uv run due.py [--vault 路徑] [--today YYYY-MM-DD]
@@ -23,6 +25,8 @@ from recall_core import (
     VaultError,
     fail,
     find_recall_dir,
+    inactive_topics,
+    passed_cards,
     read_cards,
     read_daily_minutes,
     read_events,
@@ -56,6 +60,15 @@ def _entry(card: Card, state: CardState | None, notes: list[str]) -> dict:
     }
 
 
+def _capstone_unlocked(capstone: Card, cards: list[Card], passed: set[str]) -> bool:
+    """同 Topic 其他每張卡都至少答對過一次，Capstone Card 才開考。"""
+    return all(
+        card.id in passed
+        for card in cards
+        if card.topic == capstone.topic and card.id != capstone.id
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -79,13 +92,19 @@ def main() -> None:
         fail(err)
     states = schedule(events)
     notes = recent_notes(events)
+    passed = passed_cards(events)
+    inactive = inactive_topics(recall)
 
     due_cards: list[tuple[Card, CardState]] = []
     new_cards: list[Card] = []
-    for card in read_cards(recall):
+    all_cards = read_cards(recall)
+    for card in all_cards:
         state = states.get(card.id)
         if state is None:
-            new_cards.append(card)
+            if card.topic not in inactive and (
+                not card.capstone or _capstone_unlocked(card, all_cards, passed)
+            ):
+                new_cards.append(card)
         elif state.due <= args.today:
             due_cards.append((card, state))
 

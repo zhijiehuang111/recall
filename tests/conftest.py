@@ -60,6 +60,14 @@ class Vault:
         )
         (self.recall / "cards" / f"{card_id}.md").write_text(frontmatter + "\n題目\n")
 
+    def add_topic(self, slug: str, *, status: str = "active") -> None:
+        topics = self.recall / "topics"
+        topics.mkdir(exist_ok=True)
+        (topics / f"{slug}.md").write_text(f"---\nstatus: {status}\n---\n\n問題\n")
+
+    def add_topic_card(self, card_id: str, topic: str = "oversell") -> None:
+        self.add_card(card_id, extra=f"topic: {topic}\n")
+
     def write_card(self, card_id: str, text: str) -> None:
         (self.recall / "cards" / f"{card_id}.md").write_text(text)
 

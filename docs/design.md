@@ -68,7 +68,7 @@ recall/
 
 ## Topic 狀態
 
-`active` / `paused` / `done`（Capstone Card 首次評為 Good / Easy 即 done，接著提議 Application 與下一個 Topic）。Card 的複習不受 Topic 狀態影響；非 active 時不再新增卡、不提議 Application。
+`active` / `paused` / `done`（Capstone Card 首次評為 Good / Easy 即 done，接著提議 Application 與下一個 Topic）。考過的卡照常複習；非 active 時 `due` 不列它沒考過的卡，也不再替它建卡、不提議 Application。選定的 Application 記在 Topic 本文，截止日寫在 frontmatter `application_due`，未過期時 Session 開場追問。
 
 ## 延後／待考慮
 

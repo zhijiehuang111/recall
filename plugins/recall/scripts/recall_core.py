@@ -14,8 +14,9 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import NoReturn
 
-# 腳本只讀這幾個 frontmatter 欄位，且只認單行 `key: value`；其餘行一律略過。
-_FIELD = re.compile(r"^(type|created|topic|capstone):[ \t]*(.*?)[ \t]*$")
+# 腳本只讀這幾個 frontmatter 欄位：卡片的 type、created、topic、capstone，與 Topic 的
+# status；且只認單行 `key: value`，其餘行一律略過。
+_FIELD = re.compile(r"^(type|created|topic|capstone|status):[ \t]*(.*?)[ \t]*$")
 
 GRADES = ("again", "hard", "good", "easy")
 
@@ -94,6 +95,16 @@ def _read_card(path: Path) -> Card:
         topic=fields.get("topic"),
         capstone=fields.get("capstone") == "true",
     )
+
+
+def inactive_topics(recall: Path) -> set[str]:
+    """`status` 為 paused 或 done 的 Topic；沒寫 status 的 Topic 視為 active。"""
+    return {
+        path.stem
+        for path in (recall / "topics").glob("*.md")
+        if _frontmatter_fields(path.read_text(encoding="utf-8")).get("status")
+        in ("paused", "done")
+    }
 
 
 def _frontmatter_fields(text: str) -> dict[str, str]:
@@ -274,6 +285,17 @@ def _next_state(state: CardState | None, grade: str, reviewed_on: date) -> CardS
 def _days(interval: float) -> int:
     """間隔四捨五入成整數天（.5 進位），至少 1 天。"""
     return max(1, math.floor(interval + 0.5))
+
+
+def passed_cards(events: list[dict]) -> set[str]:
+    """自最近一次 reset 以來，至少有一次非 Again 作答的卡（同日再考也算）。"""
+    passed: set[str] = set()
+    for event in events:
+        if event["event"] == "reset":
+            passed.discard(event["card"])
+        elif event["grade"] != "again":
+            passed.add(event["card"])
+    return passed
 
 
 RECENT_NOTES = 3
